@@ -1,0 +1,14 @@
+[
+  {"icao":"SBGR","name":"Sao Paulo / Guarulhos","city":"Guarulhos","state":"Sao Paulo","state_code":"SP"},
+  {"icao":"SBSP","name":"Sao Paulo / Congonhas","city":"Sao Paulo","state":"Sao Paulo","state_code":"SP"},
+  {"icao":"SBBR","name":"Presidente Juscelino Kubitschek","city":"Brasilia","state":"Distrito Federal","state_code":"DF"},
+  {"icao":"SBGL","name":"Rio de Janeiro / Galeao","city":"Rio de Janeiro","state":"Rio de Janeiro","state_code":"RJ"},
+  {"icao":"SBRJ","name":"Rio de Janeiro / Santos Dumont","city":"Rio de Janeiro","state":"Rio de Janeiro","state_code":"RJ"},
+  {"icao":"SBCT","name":"Afonso Pena","city":"Sao Jose dos Pinhais","state":"Parana","state_code":"PR"},
+  {"icao":"SBPA","name":"Salgado Filho","city":"Porto Alegre","state":"Rio Grande do Sul","state_code":"RS"},
+  {"icao":"SBCF","name":"Tancredo Neves","city":"Confins","state":"Minas Gerais","state_code":"MG"},
+  {"icao":"SBSV","name":"Deputado Luis Eduardo Magalhaes","city":"Salvador","state":"Bahia","state_code":"BA"},
+  {"icao":"SBFZ","name":"Pinto Martins","city":"Fortaleza","state":"Ceara","state_code":"CE"},
+  {"icao":"SBEG","name":"Eduardo Gomes","city":"Manaus","state":"Amazonas","state_code":"AM"},
+  {"icao":"SBFL","name":"Hercilio Luz","city":"Florianopolis","state":"Santa Catarina","state_code":"SC"}
+]

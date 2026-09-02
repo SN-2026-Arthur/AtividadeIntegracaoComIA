@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1f1f20" />
+    <title>Radar de Voos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1f1f20;
+        --blue: #2b4c7e;
+        --blue-light: #567ebb;
+        --muted: #606d80;
+        --line: #dce0e6;
+        --paper: #f5f7fa;
+        --panel: #fff;
+        --shadow: 0 1rem 2.5rem rgba(31, 31, 32, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9edf3 100%);
+        font-family: "Roboto", sans-serif;
+      }
+      .shell {
+        width: min(73.75rem, calc(100% - 2.5rem));
+        margin: auto;
+        padding: 1.875rem 0 3rem;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 0.875rem 0 1.75rem;
+        animation: rise 0.55s ease both;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(1.7rem, 4vw, 2.5rem);
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+      }
+      .kicker,
+      .eyebrow {
+        margin: 0 0 0.375rem;
+        color: var(--blue-light);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+      .subtitle {
+        margin: 0.4375rem 0 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .header-tools {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+      }
+      .live {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5625rem 0.75rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.5rem;
+        color: var(--blue);
+        background: rgba(255, 255, 255, 0.7);
+        font-size: 0.76rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .live::before {
+        content: "";
+        width: 0.4375rem;
+        height: 0.4375rem;
+        border-radius: 50%;
+        background: var(--blue-light);
+        box-shadow: 0 0 0 0.25rem rgba(86, 126, 187, 0.16);
+        animation: pulse 2s infinite;
+      }
+      .language {
+        min-height: 2.25rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.5rem;
+        color: var(--ink);
+        background: var(--panel);
+        font:
+          500 0.78rem "Roboto",
+          sans-serif;
+        padding: 0 0.5625rem;
+        cursor: pointer;
+      }
+      .toolbar {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 0.5rem 1.5rem rgba(31, 31, 32, 0.04);
+        animation: rise 0.55s 0.08s ease both;
+      }
+      label {
+        display: grid;
+        gap: 0.4375rem;
+        color: var(--muted);
+        font-size: 0.69rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      select,
+      button {
+        min-height: 2.625rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.5rem;
+        color: var(--ink);
+        background: var(--panel);
+        font:
+          500 0.88rem "Roboto",
+          sans-serif;
+        padding: 0 0.8125rem;
+      }
+      select {
+        min-width: 17.5rem;
+        appearance: none;
+        background-image:
+          linear-gradient(45deg, transparent 50%, var(--blue) 50%),
+          linear-gradient(135deg, var(--blue) 50%, transparent 50%);
+        background-position:
+          calc(100% - 0.9375rem) 50%,
+          calc(100% - 0.6875rem) 50%;
+        background-size:
+          0.25rem 0.25rem,
+          0.25rem 0.25rem;
+        background-repeat: no-repeat;
+        cursor: pointer;
+      }
+      .airport-picker {
+        position: relative;
+        z-index: 11;
+        min-width: 17.5rem;
+      }
+      .airport-select-native {
+        position: absolute;
+        width: 0.0625rem;
+        height: 0.0625rem;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .airport-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 2.625rem;
+        gap: 0.75rem;
+        padding: 0 0.8125rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.5rem;
+        color: var(--ink);
+        background: var(--panel);
+        font:
+          500 0.88rem "Roboto",
+          sans-serif;
+        text-align: left;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .airport-trigger:hover,
+      .airport-picker.is-open .airport-trigger {
+        border-color: var(--blue-light);
+        box-shadow: 0 0 0 0.1875rem rgba(86, 126, 187, 0.13);
+      }
+      .airport-trigger::after {
+        content: "";
+        flex: 0 0 0.5rem;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-right: 0.125rem solid var(--blue);
+        border-bottom: 0.125rem solid var(--blue);
+        transform: rotate(45deg) translateY(-0.125rem);
+        transition: transform 0.2s ease;
+      }
+      .airport-picker.is-open .airport-trigger::after {
+        transform: rotate(225deg) translate(-0.0625rem, -0.0625rem);
+      }
+      .airport-value-code {
+        color: var(--blue);
+        font-weight: 700;
+      }
+      .airport-menu {
+        position: absolute;
+        z-index: 5;
+        top: calc(100% + 0.5rem);
+        left: 0;
+        right: 0;
+        display: grid;
+        gap: 0.25rem;
+        max-height: min(18rem, 45vh);
+        overflow-y: auto;
+        padding: 0.375rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.625rem;
+        background: var(--panel);
+        box-shadow: 0 0.75rem 2rem rgba(31, 31, 32, 0.14);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-0.375rem);
+        transition:
+          opacity 0.18s ease,
+          transform 0.18s ease;
+      }
+      .airport-picker.is-open .airport-menu {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      .airport-option {
+        display: grid;
+        grid-template-columns: 3.5rem 1fr;
+        gap: 0.625rem;
+        width: 100%;
+        padding: 0.625rem 0.6875rem;
+        border: 0;
+        border-radius: 0.375rem;
+        color: var(--ink);
+        background: transparent;
+        font:
+          400 0.82rem "Roboto",
+          sans-serif;
+        text-align: left;
+        cursor: pointer;
+      }
+      .airport-option:hover,
+      .airport-option[aria-selected="true"] {
+        color: var(--blue);
+        background: #eef2f8;
+      }
+      .airport-option-code {
+        font-weight: 700;
+      }
+      .airport-option-meta {
+        display: block;
+        margin-top: 0.1875rem;
+        color: var(--muted);
+        font-size: 0.7rem;
+      }
+      button {
+        height: 2.625rem;
+        align-self: flex-end;
+        flex: 0 0 auto;
+        border-color: var(--blue);
+        color: #fff;
+        background: var(--blue);
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
+      }
+      button:hover {
+        background: var(--blue-light);
+        transform: translateY(-0.0625rem);
+      }
+      button:focus-visible,
+      select:focus-visible {
+        outline: 0.1875rem solid rgba(86, 126, 187, 0.35);
+        outline-offset: 0.125rem;
+      }
+      .updated {
+        align-self: center;
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 0.76rem;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.35fr 0.65fr;
+        gap: 1rem;
+        margin-bottom: 1.625rem;
+        animation: rise 0.55s 0.16s ease both;
+      }
+      .airport-card,
+      .stat {
+        border: 0.0625rem solid var(--line);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+      .airport-card {
+        position: relative;
+        overflow: hidden;
+        padding: 1.5625rem 1.75rem;
+        border-radius: 0.75rem;
+      }
+      .airport-card::after {
+        content: "";
+        position: absolute;
+        width: 10rem;
+        height: 10rem;
+        right: -3.125rem;
+        top: -4.0625rem;
+        border: 0.0625rem solid rgba(86, 126, 187, 0.2);
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 1.25rem rgba(86, 126, 187, 0.04),
+          0 0 0 2.5rem rgba(86, 126, 187, 0.04);
+      }
+      .airport-card h2 {
+        margin: 0 0 0.625rem;
+        font-size: clamp(1.35rem, 3vw, 1.85rem);
+        font-weight: 500;
+      }
+      .airport-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .airport-card strong {
+        color: var(--blue);
+        font-size: 1rem;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 8.875rem;
+        padding: 1.1875rem;
+        border-radius: 0.75rem;
+      }
+      .stat b {
+        color: var(--blue);
+        font-size: 2.5rem;
+        font-weight: 500;
+      }
+      .stat span {
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .tables {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.125rem;
+        animation: rise 0.55s 0.24s ease both;
+      }
+      .table-panel {
+        min-width: 0;
+        padding: 1.125rem;
+        border: 0.0625rem solid var(--line);
+        border-radius: 0.75rem;
+        background: var(--panel);
+        box-shadow: 0 0.5rem 1.625rem rgba(31, 31, 32, 0.04);
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.625rem;
+        margin-bottom: 0.3125rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 0.125rem solid var(--ink);
+      }
+      .section-head h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+      .section-head span {
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+      th {
+        padding: 0.6875rem 0.4375rem;
+        color: var(--muted);
+        text-align: left;
+        font-size: 0.64rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      td {
+        border-top: 0.0625rem solid var(--line);
+        padding: 0.8125rem 0.4375rem;
+        vertical-align: top;
+      }
+      td:first-child {
+        color: var(--blue);
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      td small {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 400;
+      }
+      .status {
+        display: inline-block;
+        padding: 0.25rem 0.4375rem;
+        border-radius: 0.3125rem;
+        color: var(--blue);
+        background: #e9eef6;
+        font-size: 0.66rem;
+        text-transform: capitalize;
+      }
+      .status.cancelled {
+        color: var(--ink);
+        background: var(--line);
+      }
+      .empty {
+        min-height: 8.125rem;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-align: center;
+        padding: 1.25rem;
+      }
+      .error {
+        color: var(--blue);
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.625rem;
+        margin-top: 1.875rem;
+        padding-top: 0.9375rem;
+        border-top: 0.0625rem solid var(--line);
+        color: var(--muted);
+        font-size: 0.7rem;
+      }
+      .loading {
+        animation: shimmer 1.3s linear infinite;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(0.75rem);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.45;
+          box-shadow: 0 0 0 0.4375rem rgba(86, 126, 187, 0.08);
+        }
+      }
+      @keyframes shimmer {
+        50% {
+          opacity: 0.45;
+        }
+      }
+      @media (max-width: 47.5rem) {
+        .shell {
+          width: min(100% - 1.5rem, 36.25rem);
+          padding-top: 1.125rem;
+        }
+        header {
+          flex-direction: column;
+          gap: 1.125rem;
+        }
+        .header-tools {
+          width: 100%;
+          justify-content: space-between;
+        }
+        .toolbar,
+        .hero,
+        .tables {
+          grid-template-columns: 1fr;
+        }
+        .toolbar {
+          align-items: stretch;
+        }
+        .toolbar > label,
+        .toolbar > button,
+        .toolbar > .updated {
+          width: 100%;
+          margin-left: 0;
+        }
+        .toolbar > button {
+          flex: 1 1 100%;
+        }
+        select,
+        .airport-picker {
+          width: 100%;
+          min-width: 0;
+        }
+        button {
+          width: 100%;
+        }
+        .updated {
+          width: 100%;
+          margin-left: 0;
+        }
+        .airport-card {
+          padding: 1.375rem;
+        }
+        .table-panel {
+          overflow-x: auto;
+        }
+        table {
+          min-width: 28.125rem;
+        }
+        footer {
+          flex-direction: column;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <div class="brand">
+          <div>
+            <p class="kicker" data-i18n="kicker">SN-2026 / monitoramento</p>
+            <h1 data-i18n="title">Radar de voos</h1>
+            <p class="subtitle" data-i18n="subtitle">
+              Acompanhe chegadas e partidas em tempo real
+            </p>
+          </div>
+        </div>
+        <div class="header-tools">
+          <select class="language" id="language" aria-label="Idioma">
+            <option value="pt">PT</option>
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+          </select>
+          <div class="live" data-i18n="live">ao vivo</div>
+        </div>
+      </header>
+      <section class="toolbar">
+        <label
+          ><span data-i18n="airportLabel">Aeroporto</span>
+          <div class="airport-picker" id="airportPicker">
+            <select
+              class="airport-select-native"
+              id="airportSelect"
+              aria-hidden="true"
+              tabindex="-1"
+            ></select>
+            <button
+              class="airport-trigger"
+              id="airportTrigger"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              Selecione um aeroporto
+            </button>
+            <div
+              class="airport-menu"
+              id="airportMenu"
+              role="listbox"
+              aria-label="Escolha um aeroporto"
+            ></div></div></label
+        ><button id="refresh" type="button" data-i18n="refresh">
+          Atualizar dados</button
+        ><span class="updated" id="updated" data-i18n="loadingAirports"
+          >Carregando aeroportos...</span
+        >
+      </section>
+      <section class="hero">
+        <div class="airport-card">
+          <p class="eyebrow" data-i18n="selectedAirport">
+            Aeroporto selecionado
+          </p>
+          <h2 id="airportName">Carregando...</h2>
+          <p>
+            <strong id="airportCode">----</strong> &nbsp;
+            <span id="airportLocation" data-i18n="chooseAirport"
+              >Selecione um aeroporto</span
+            >
+          </p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <b id="arrivalCount">-</b><span data-i18n="arrivals">Chegadas</span>
+          </div>
+          <div class="stat">
+            <b id="departureCount">-</b
+            ><span data-i18n="departures">Partidas</span>
+          </div>
+        </div>
+      </section>
+      <section class="tables">
+        <div class="table-panel">
+          <div class="section-head">
+            <h2 data-i18n="arrivals">Chegadas</h2>
+            <span data-i18n="nextFlights">próximos voos</span>
+          </div>
+          <div id="arrivals">
+            <div class="empty loading" data-i18n="loadingFlights">
+              Carregando movimentos...
+            </div>
+          </div>
+        </div>
+        <div class="table-panel">
+          <div class="section-head">
+            <h2 data-i18n="departures">Partidas</h2>
+            <span data-i18n="nextFlights">próximos voos</span>
+          </div>
+          <div id="departures">
+            <div class="empty loading" data-i18n="loadingFlights">
+              Carregando movimentos...
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer>
+        <span data-i18n="source">Fonte: SIROS/ANAC + Supabase</span
+        ><span id="clock"></span>
+      </footer>
+    </main>
+    <script>
+      const select = document.querySelector("#airportSelect");
+      const airportPicker = document.querySelector("#airportPicker");
+      const airportTrigger = document.querySelector("#airportTrigger");
+      const airportMenu = document.querySelector("#airportMenu");
+      const state = {
+        airports: [],
+        language: localStorage.getItem("flight-language") || "pt",
+      };
+      const SUPABASE_URL = "https://pwuxdowztkpikoefliey.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_R-0np1sYvsNRGfUo-NROng_oJinGZNc";
+      const SUPABASE_HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
+      const translations = {
+        pt: {
+          kicker: "SN-2026 / monitoramento",
+          title: "Radar de voos",
+          subtitle: "Acompanhe chegadas e partidas em tempo real",
+          live: "ao vivo",
+          airportLabel: "Aeroporto",
+          refresh: "Atualizar dados",
+          loadingAirports: "Carregando aeroportos...",
+          selectedAirport: "Aeroporto selecionado",
+          chooseAirport: "Selecione um aeroporto",
+          arrivals: "Chegadas",
+          departures: "Partidas",
+          nextFlights: "próximos voos",
+          loadingFlights: "Carregando movimentos...",
+          source: "Fonte: SIROS/ANAC + Supabase",
+          noFlights: "Nenhum voo encontrado para este período.",
+          missing: "Arquivo de dados ainda não publicado.",
+          runWorkflow: "Execute o workflow para gerar este aeroporto.",
+          noData: "Sem dados para exibir.",
+          waiting: "Aguardando primeira coleta",
+          loaded: "Dados carregados",
+          updated: "Atualizado",
+        },
+        en: {
+          kicker: "SN-2026 / monitoring",
+          title: "Flight radar",
+          subtitle: "Track arrivals and departures in real time",
+          live: "live",
+          airportLabel: "Airport",
+          refresh: "Refresh data",
+          loadingAirports: "Loading airports...",
+          selectedAirport: "Selected airport",
+          chooseAirport: "Choose an airport",
+          arrivals: "Arrivals",
+          departures: "Departures",
+          nextFlights: "upcoming flights",
+          loadingFlights: "Loading movements...",
+          source: "Source: SIROS/ANAC + Supabase",
+          noFlights: "No flights found for this period.",
+          missing: "Flight data has not been published yet.",
+          runWorkflow: "Run the workflow to generate this airport.",
+          noData: "No data to display.",
+          waiting: "Waiting for first collection",
+          loaded: "Data loaded",
+          updated: "Updated",
+        },
+        es: {
+          kicker: "SN-2026 / monitoreo",
+          title: "Radar de vuelos",
+          subtitle: "Sigue llegadas y salidas en tiempo real",
+          live: "en vivo",
+          airportLabel: "Aeropuerto",
+          refresh: "Actualizar datos",
+          loadingAirports: "Cargando aeropuertos...",
+          selectedAirport: "Aeropuerto seleccionado",
+          chooseAirport: "Selecciona un aeropuerto",
+          arrivals: "Llegadas",
+          departures: "Salidas",
+          nextFlights: "próximos vuelos",
+          loadingFlights: "Cargando movimientos...",
+          source: "Fuente: SIROS/ANAC + Supabase",
+          noFlights: "No se encontraron vuelos para este período.",
+          missing: "Los datos aún no se han publicado.",
+          runWorkflow: "Ejecuta el workflow para generar este aeropuerto.",
+          noData: "No hay datos para mostrar.",
+          waiting: "Esperando la primera recopilación",
+          loaded: "Datos cargados",
+          updated: "Actualizado",
+        },
+      };
+      const t = (key) =>
+        translations[state.language][key] || translations.pt[key];
+      const locale = () =>
+        state.language === "en"
+          ? "en-US"
+          : state.language === "es"
+            ? "es-ES"
+            : "pt-BR";
+      const formatTime = (value) =>
+        value
+          ? new Date(value).toLocaleTimeString(locale(), {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "--:--";
+      const esc = (value) =>
+        String(value || "").replace(
+          /[&<>'"]/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              "'": "&#39;",
+              '"': "&quot;",
+            })[char],
+        );
+      function applyLanguage() {
+        document.documentElement.lang =
+          state.language === "pt" ? "pt-BR" : state.language;
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          element.textContent = t(element.dataset.i18n);
+        });
+        if (state.airports.length) loadFlights(select.value);
+      }
+      function renderRows(items, direction) {
+        if (!items.length) return `<div class="empty">${t("noFlights")}</div>`;
+        return `<table><thead><tr><th>Time</th><th>Flight / airline</th><th>${direction === "arrival" ? "Origin" : "Destination"}</th><th>Status</th></tr></thead><tbody>${items
+          .slice(0, 30)
+          .map(
+            (f) =>
+              `<tr><td>${formatTime(f.time_iso || f.scheduled)}</td><td>${esc(f.callsign)}<small>${esc(f.airline)}</small></td><td>${esc(f.airport_name || f.airport)}</td><td><span class="status ${f.status === "cancelled" ? "cancelled" : ""}">${esc(f.status || "scheduled")}</span></td></tr>`,
+          )
+          .join("")}</tbody></table>`;
+      }
+      function updateAirportTrigger() {
+        const airport = state.airports.find(
+          (item) => item.icao === select.value,
+        );
+        if (!airport) return;
+        airportTrigger.innerHTML = `<span><span class="airport-value-code">${esc(airport.icao)}</span> <span>${esc(airport.city)}</span></span>`;
+        airportMenu.querySelectorAll(".airport-option").forEach((option) => {
+          option.setAttribute(
+            "aria-selected",
+            option.dataset.value === select.value,
+          );
+        });
+      }
+      function renderAirportOptions() {
+        airportMenu.innerHTML = state.airports
+          .map(
+            (airport) =>
+              `<button class="airport-option" type="button" role="option" data-value="${esc(airport.icao)}" aria-selected="false"><span class="airport-option-code">${esc(airport.icao)}</span><span>${esc(airport.city)}<span class="airport-option-meta">${esc(airport.name)} · ${esc(airport.state_code)}</span></span></button>`,
+          )
+          .join("");
+        airportMenu.querySelectorAll(".airport-option").forEach((option) =>
+          option.addEventListener("click", () => {
+            select.value = option.dataset.value;
+            updateAirportTrigger();
+            airportPicker.classList.remove("is-open");
+            airportTrigger.setAttribute("aria-expanded", "false");
+            loadFlights(select.value);
+          }),
+        );
+        updateAirportTrigger();
+      }
+      function toggleAirportMenu(force) {
+        const open = force ?? !airportPicker.classList.contains("is-open");
+        airportPicker.classList.toggle("is-open", open);
+        airportTrigger.setAttribute("aria-expanded", String(open));
+      }
+      async function loadSupabaseFlights(icao) {
+        const today = new Date().toISOString().slice(0, 10);
+        const params = new URLSearchParams({ data_referencia: `eq.${today}`, or: `(icao_destino.eq.${icao},icao_origem.eq.${icao})`, order: "partida_iso.asc", limit: "500" });
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/voos?${params}`, { headers: SUPABASE_HEADERS });
+        if (!response.ok) throw new Error(`Supabase HTTP ${response.status}`);
+        const rows = await response.json();
+        return {
+          arrivals: rows.filter((row) => row.icao_destino === icao).map((row) => ({ callsign: `${row.icao_empresa}${row.numero_voo}`, airline: row.nome_empresa, airport: row.icao_origem, airport_name: row.icao_origem, scheduled: row.chegada_iso, time_iso: row.chegada_iso, status: row.tipo_servico })),
+          departures: rows.filter((row) => row.icao_origem === icao).map((row) => ({ callsign: `${row.icao_empresa}${row.numero_voo}`, airline: row.nome_empresa, airport: row.icao_destino, airport_name: row.icao_destino, scheduled: row.partida_iso, time_iso: row.partida_iso, status: row.tipo_servico })),
+        };
+      }
+      async function loadFlights(icao) {
+        const airport = state.airports.find((item) => item.icao === icao);
+        if (!airport) return;
+        document.querySelector("#airportName").textContent = airport.name;
+        document.querySelector("#airportCode").textContent = airport.icao;
+        document.querySelector("#airportLocation").textContent =
+          `${airport.city}, ${airport.state_code}`;
+        document.querySelector("#arrivals").innerHTML =
+          `<div class="empty loading">${t("loadingFlights")}</div>`;
+        document.querySelector("#departures").innerHTML =
+          `<div class="empty loading">${t("loadingFlights")}</div>`;
+        try {
+          let data;
+          try {
+            data = await loadSupabaseFlights(icao);
+          } catch (supabaseError) {
+            const response = await fetch(`data/${icao}.json?ts=${Date.now()}`);
+            if (!response.ok) throw new Error(t("missing"));
+            data = await response.json();
+          }
+          document.querySelector("#arrivalCount").textContent =
+            data.arrivals.length;
+          document.querySelector("#departureCount").textContent =
+            data.departures.length;
+          document.querySelector("#arrivals").innerHTML = renderRows(
+            data.arrivals,
+            "arrival",
+          );
+          document.querySelector("#departures").innerHTML = renderRows(
+            data.departures,
+            "departure",
+          );
+          document.querySelector("#updated").textContent = data.updated_at
+            ? `${t("updated")} ${new Date(data.updated_at).toLocaleString(locale())}`
+            : t("loaded");
+        } catch (error) {
+          document.querySelector("#arrivalCount").textContent = "0";
+          document.querySelector("#departureCount").textContent = "0";
+          document.querySelector("#arrivals").innerHTML =
+            `<div class="empty error">${esc(error.message)}<br>${t("runWorkflow")}</div>`;
+          document.querySelector("#departures").innerHTML =
+            `<div class="empty">${t("noData")}</div>`;
+          document.querySelector("#updated").textContent = t("waiting");
+        }
+      }
+      async function start() {
+        try {
+          const response = await fetch("data/airports.json");
+          state.airports = await response.json();
+          select.innerHTML = state.airports
+            .map(
+              (airport) =>
+                `<option value="${airport.icao}">${airport.icao} - ${airport.city}</option>`,
+            )
+            .join("");
+          renderAirportOptions();
+          applyLanguage();
+          await loadFlights(select.value);
+        } catch (error) {
+          document.querySelector("#updated").textContent =
+            "Falha ao carregar aeroportos";
+        }
+      }
+      airportTrigger.addEventListener("click", () => toggleAirportMenu());
+      airportTrigger.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") toggleAirportMenu(false);
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleAirportMenu();
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (!airportPicker.contains(event.target)) toggleAirportMenu(false);
+      });
+      document
+        .querySelector("#refresh")
+        .addEventListener("click", () => loadFlights(select.value));
+      document.querySelector("#language").value = state.language;
+      document
+        .querySelector("#language")
+        .addEventListener("change", (event) => {
+          state.language = event.target.value;
+          localStorage.setItem("flight-language", state.language);
+          applyLanguage();
+        });
+      document.querySelector("#clock").textContent =
+        new Date().toLocaleDateString("pt-BR");
+      start();
+    </script>
+  </body>
+</html>

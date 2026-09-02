@@ -1,0 +1,11 @@
+# Credenciais locais
+.env
+
+# Ambiente Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Dados locais gerados pelo coletor
+/data/*.json
+!/data/airports.json
